@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>Pokémon Math Battle</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Start / Pokemon selection screen -->
+    <section id="start-screen">
+      <h1>Pokémon Math Battle</h1>
+      <p class="subtitle">Choose your Pokémon and win with math!</p>
+      <div id="pokemon-grid"></div>
+      <button id="start-btn" disabled>Start Battle</button>
+    </section>
+
+    <!-- Battle screen - classic 4-corner: opponent bar top-left, opponent sprite top-right, player sprite bottom-left, player bar bottom-right -->
+    <section id="battle-screen" class="hidden">
+      <div class="battle-scene">
+        <!-- Sky + grass background -->
+        <div class="battle-background"></div>
+
+        <!-- Top row: opponent info (50%) + opponent sprite (50%), aligned horizontally -->
+        <div class="battle-corner opponent-row">
+          <div class="opponent-info-corner">
+            <div class="pokemon-info-bar opponent-info">
+              <span id="opponent-name"></span>
+              <span id="opponent-level" class="level">Lv.5</span>
+              <div class="hp-row">
+                <span class="hp-label">HP</span>
+                <div id="opponent-hp-bar" class="hp-bar"></div>
+              </div>
+            </div>
+          </div>
+          <div class="opponent-sprite-corner">
+            <div class="grass-patch">
+              <div class="pokemon-sprite" id="opponent-sprite"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom-left: player Pokémon on grass (with foreground grass for depth) -->
+        <div class="battle-corner player-sprite-corner">
+          <div class="grass-patch">
+            <div class="pokemon-sprite" id="player-sprite"></div>
+          </div>
+          <div class="foreground-grass" aria-hidden="true"></div>
+        </div>
+
+        <!-- Catch animation: pokeball (hidden until catch) -->
+        <div id="catch-pokeball" class="pokeball catch-pokeball-hidden" aria-hidden="true"></div>
+
+        <!-- Bottom-right: player info bar -->
+        <div class="battle-corner player-info-corner">
+          <div class="pokemon-info-bar player-info">
+            <span id="player-name"></span>
+            <span id="player-level" class="level">Lv.5</span>
+            <div class="hp-row">
+              <span class="hp-label">HP</span>
+              <div id="player-hp-bar" class="hp-bar"></div>
+              <span id="player-hp-text" class="hp-nums">3/3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom bar: question (left) + 4 options (right) -->
+      <div class="battle-dialogue">
+        <div class="dialogue-message">
+          <p id="math-question"></p>
+          <p id="feedback" class="feedback hidden"></p>
+        </div>
+        <div class="dialogue-choices">
+          <div id="answers-grid" class="choices-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Caught Pokémon prompt (overlay after successful catch) -->
+    <div id="caught-prompt" class="caught-prompt hidden">
+      <div class="caught-prompt-box">
+        <p class="caught-prompt-title">Caught!</p>
+        <div class="caught-prompt-sprite" id="caught-prompt-sprite"></div>
+        <p class="caught-prompt-name" id="caught-prompt-name"></p>
+        <button type="button" id="caught-prompt-ok">OK</button>
+      </div>
+    </div>
+
+    <!-- Evolution prompt (overlay when Pokémon evolves) -->
+    <div id="evolution-prompt" class="evolution-prompt hidden">
+      <div class="evolution-prompt-box">
+        <p class="evolution-prompt-title">Evolved!</p>
+        <div class="evolution-prompt-sprite" id="evolution-prompt-sprite"></div>
+        <p class="evolution-prompt-message" id="evolution-prompt-message"></p>
+        <button type="button" id="evolution-prompt-ok">OK</button>
+      </div>
+    </div>
+
+    <!-- Result screen (overlay) -->
+    <section id="result-screen" class="hidden overlay">
+      <div class="result-box">
+        <h2 id="result-title"></h2>
+        <p id="result-message"></p>
+        <div class="result-actions">
+          <button id="next-battle-btn">Next Battle</button>
+          <button id="change-pokemon-btn">Change Pokémon</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script src="pokemon.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
