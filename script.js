@@ -188,8 +188,9 @@ function generateMathQuestion() {
     b = Math.floor(Math.random() * (a + 1))
     answer = a - b
   }
-  const questionText = isAddition ? `${a} + ${b} = ?` : `${a} − ${b} = ?`
-  return { questionText, answer }
+  const operator = isAddition ? '+' : '-'
+  const questionText = `${a} ${operator} ${b} = ?`
+  return { a, b, operator, questionText, answer }
 }
 
 function shuffle(arr) {
@@ -225,12 +226,13 @@ function showNextQuestion() {
   feedbackEl.textContent = ''
   answerButtonsDisabled = false
 
-  const { questionText, answer } = generateMathQuestion()
+  const { a, b, operator, answer } = generateMathQuestion()
   currentCorrectAnswer = answer
   const wrongs = getWrongAnswers(answer)
   const choices = shuffle([answer, ...wrongs])
 
-  questionEl.textContent = questionText
+  const isAddition = operator === '+'
+  questionEl.innerHTML = `${a} <span class="math-operator math-operator--${isAddition ? 'plus' : 'minus'}">${operator}</span> ${b} = ?`
 
   choices.forEach(value => {
     const btn = document.createElement('button')
@@ -349,12 +351,13 @@ function showCatchQuestion() {
   feedbackEl.textContent = ''
   answerButtonsDisabled = false
 
-  const { questionText, answer } = generateMathQuestion()
+  const { a, b, operator, answer } = generateMathQuestion()
   currentCorrectAnswer = answer
   const wrongs = getWrongAnswers(answer)
   const choices = shuffle([answer, ...wrongs])
 
-  questionEl.innerHTML = `Catch ${opponentPokemon.name}!<br>${questionText}`
+  const isAddition = operator === '+'
+  questionEl.innerHTML = `Catch ${opponentPokemon.name}!<br>${a} <span class="math-operator math-operator--${isAddition ? 'plus' : 'minus'}">${operator}</span> ${b} = ?`
 
   choices.forEach(value => {
     const btn = document.createElement('button')

@@ -729,6 +729,37 @@ h1 {
   line-height: 1.6;
 }
 
+#math-question .math-operator {
+  vertical-align: middle;
+}
+
+/* Plus: CSS-drawn cross to match the minus bar style */
+#math-question .math-operator--plus {
+  font-size: 0;
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin: 0 0.08rem;
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor);
+  background-size: 0.18rem 0.7rem, 0.7rem 0.18rem;
+  background-position: center, center;
+  background-repeat: no-repeat;
+  vertical-align: middle;
+}
+
+/* Minus: visible bar so it doesn’t look like an underscore in pixel fonts */
+#math-question .math-operator--minus {
+  font-size: 0;
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.18rem;
+  margin: 0 0.08rem;
+  background: currentColor;
+  vertical-align: middle;
+}
+
 #feedback {
   margin: 6px 0 0;
   font-family: 'Press Start 2P', cursive;
