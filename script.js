@@ -180,12 +180,17 @@ function generateMathQuestion() {
   const isAddition = Math.random() < 0.5
   let a, b, answer
   if (isAddition) {
-    a = Math.floor(Math.random() * 21)
-    b = Math.floor(Math.random() * (21 - a))
+    // Addition: a + b between 1 and 20, no zeros
+    // Pick a in [1, 19], then b in [1, 20 - a]
+    a = 1 + Math.floor(Math.random() * 19)
+    b = 1 + Math.floor(Math.random() * (20 - a))
     answer = a + b
   } else {
-    a = Math.floor(Math.random() * 21)
-    b = Math.floor(Math.random() * (a + 1))
+    // Subtraction: a - b between 1 and 20, no zeros, and b < a
+    // Pick a in [2, 20], then b in [1, a - 1]
+    a = 2 + Math.floor(Math.random() * 19)
+    if (a > 20) a = 20
+    b = 1 + Math.floor(Math.random() * (a - 1))
     answer = a - b
   }
   const operator = isAddition ? '+' : '-'
@@ -518,6 +523,8 @@ function showResult() {
     if (evolutionForPrompt) {
       showEvolutionPrompt(evolutionForPrompt.oldName, evolutionForPrompt.nextPokemon)
     }
+    // After each win, restore 1 HP without exceeding max HP
+    playerHp = Math.min(playerHp + 1, playerMaxHp)
     updateBattleUI()
     caughtThisBattle = null
   } else {
