@@ -32,6 +32,12 @@ let opponentHp = 3
 let playerMaxHp = 3
 let opponentMaxHp = 3
 let currentCorrectAnswer = null
+/** 'math' | 'mcq' – used for answer comparison and correct-button highlight */
+let currentQuestionMode = 'math'
+/** MCQ rows from server (GET /api/sheet-questions); empty if URL not set or fetch failed */
+let SHEET_QUESTIONS = []
+/** null = all types (MATH, EN, ZH CSV); else array from server allowedQuestionTypes */
+let ALLOWED_QUESTION_TYPES = null
 let answerButtonsDisabled = false
 let catchAttemptPhase = false
 let caughtThisBattle = null
@@ -220,6 +226,152 @@ function getWrongAnswers(correct, count = 3) {
   return [...wrong]
 }
 
+function loadSheetQuestions() {
+  return fetch('/api/sheet-questions')
+    .then(r => r.json().catch(() => ({})))
+    .then(data => {
+      SHEET_QUESTIONS = Array.isArray(data.questions) ? data.questions : []
+      const t = data.allowedQuestionTypes
+      ALLOWED_QUESTION_TYPES = Array.isArray(t) ? t : null
+    })
+    .catch(() => {
+      SHEET_QUESTIONS = []
+      ALLOWED_QUESTION_TYPES = null
+    })
+}
+
+function normalizeMcqRow(row) {
+  const q = String(row.question || '').trim()
+  const ans = String(row.answer || '').trim()
+  const w1 = String(row.wrong1 || '').trim()
+  const w2 = String(row.wrong2 || '').trim()
+  const w3 = String(row.wrong3 || '').trim()
+  if (!q || !ans || !w1 || !w2 || !w3) return null
+  if (new Set([ans, w1, w2, w3]).size !== 4) return null
+  return { question: q, answer: ans, choices: shuffle([ans, w1, w2, w3]) }
+}
+
+function pickMcqFromSheet() {
+  for (let n = 0; n < 20; n++) {
+    const row = SHEET_QUESTIONS[Math.floor(Math.random() * SHEET_QUESTIONS.length)]
+    const mcq = normalizeMcqRow(row)
+    if (mcq) return { mode: 'mcq', ...mcq }
+  }
+  return null
+}
+
+function pickBattleQuestion() {
+  const allTypes = ALLOWED_QUESTION_TYPES == null || ALLOWED_QUESTION_TYPES.length === 0
+  const mathOk = allTypes || ALLOWED_QUESTION_TYPES.includes('MATH')
+  const csvOk =
+    SHEET_QUESTIONS.length > 0 &&
+    (allTypes || ALLOWED_QUESTION_TYPES.includes('EN') || ALLOWED_QUESTION_TYPES.includes('ZH'))
+
+  const tryMcqFirst = csvOk && (!mathOk || Math.random() < 0.5)
+  if (tryMcqFirst) {
+    const mcq = pickMcqFromSheet()
+    if (mcq) return mcq
+  }
+  if (mathOk) {
+    const m = generateMathQuestion()
+    const wrongs = getWrongAnswers(m.answer)
+    const choices = shuffle([m.answer, ...wrongs])
+    return {
+      mode: 'math',
+      a: m.a,
+      b: m.b,
+      operator: m.operator,
+      answer: m.answer,
+      choices
+    }
+  }
+  if (csvOk) {
+    const mcq = pickMcqFromSheet()
+    if (mcq) return mcq
+  }
+  console.warn('pickBattleQuestion: no question pool matches ALLOWED_QUESTION_TYPE; using MATH')
+  const m = generateMathQuestion()
+  const wrongs = getWrongAnswers(m.answer)
+  const choices = shuffle([m.answer, ...wrongs])
+  return {
+    mode: 'math',
+    a: m.a,
+    b: m.b,
+    operator: m.operator,
+    answer: m.answer,
+    choices
+  }
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+/** Wrap emoji (incl. ZWJ sequences) in spans for larger display; escape the rest */
+function formatQuestionWithBigEmoji(text) {
+  const str = String(text)
+  const emojiRun = /\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*/gu
+  const out = []
+  let last = 0
+  let m
+  const re = new RegExp(emojiRun.source, emojiRun.flags)
+  while ((m = re.exec(str)) !== null) {
+    if (m.index > last) out.push(escapeHtml(str.slice(last, m.index)))
+    out.push(`<span class="question-emoji">${escapeHtml(m[0])}</span>`)
+    last = m.index + m[0].length
+  }
+  if (last < str.length) out.push(escapeHtml(str.slice(last)))
+  return out.join('')
+}
+
+function applyQuestionToBattleUI(questionEl, picked, isCatch) {
+  if (picked.mode === 'mcq') {
+    currentQuestionMode = 'mcq'
+    currentCorrectAnswer = picked.answer
+    const qHtml = formatQuestionWithBigEmoji(picked.question)
+    if (isCatch) {
+      questionEl.innerHTML = ''
+      const catchLine = document.createElement('div')
+      catchLine.textContent = `Catch ${opponentPokemon.name}!`
+      const qLine = document.createElement('div')
+      qLine.innerHTML = qHtml
+      questionEl.appendChild(catchLine)
+      questionEl.appendChild(qLine)
+    } else {
+      questionEl.innerHTML = qHtml
+    }
+  } else {
+    currentQuestionMode = 'math'
+    currentCorrectAnswer = picked.answer
+    const isAddition = picked.operator === '+'
+    const inner = `${picked.a} <span class="math-operator math-operator--${isAddition ? 'plus' : 'minus'}">${picked.operator}</span> ${picked.b} = ?`
+    if (isCatch) {
+      questionEl.innerHTML = `Catch ${opponentPokemon.name}!<br>${inner}`
+    } else {
+      questionEl.innerHTML = inner
+    }
+  }
+}
+
+function isPlayerAnswerCorrect(value) {
+  if (currentQuestionMode === 'mcq') {
+    return String(value).trim() === String(currentCorrectAnswer).trim()
+  }
+  return Number(value) === currentCorrectAnswer
+}
+
+function isButtonTheCorrectAnswer(btn) {
+  const t = btn.textContent.trim()
+  if (currentQuestionMode === 'mcq') {
+    return t === String(currentCorrectAnswer).trim()
+  }
+  return Number(t) === currentCorrectAnswer
+}
+
 function showNextQuestion() {
   const questionEl = document.getElementById('math-question')
   const grid = document.getElementById('answers-grid')
@@ -231,13 +383,9 @@ function showNextQuestion() {
   feedbackEl.textContent = ''
   answerButtonsDisabled = false
 
-  const { a, b, operator, answer } = generateMathQuestion()
-  currentCorrectAnswer = answer
-  const wrongs = getWrongAnswers(answer)
-  const choices = shuffle([answer, ...wrongs])
-
-  const isAddition = operator === '+'
-  questionEl.innerHTML = `${a} <span class="math-operator math-operator--${isAddition ? 'plus' : 'minus'}">${operator}</span> ${b} = ?`
+  const picked = pickBattleQuestion()
+  applyQuestionToBattleUI(questionEl, picked, false)
+  const choices = picked.choices
 
   choices.forEach(value => {
     const btn = document.createElement('button')
@@ -356,13 +504,9 @@ function showCatchQuestion() {
   feedbackEl.textContent = ''
   answerButtonsDisabled = false
 
-  const { a, b, operator, answer } = generateMathQuestion()
-  currentCorrectAnswer = answer
-  const wrongs = getWrongAnswers(answer)
-  const choices = shuffle([answer, ...wrongs])
-
-  const isAddition = operator === '+'
-  questionEl.innerHTML = `Catch ${opponentPokemon.name}!<br>${a} <span class="math-operator math-operator--${isAddition ? 'plus' : 'minus'}">${operator}</span> ${b} = ?`
+  const picked = pickBattleQuestion()
+  applyQuestionToBattleUI(questionEl, picked, true)
+  const choices = picked.choices
 
   choices.forEach(value => {
     const btn = document.createElement('button')
@@ -380,12 +524,12 @@ function submitAnswer(value, btn) {
   const feedbackEl = document.getElementById('feedback')
   const playerSprite = document.getElementById('player-sprite')
   const opponentSprite = document.getElementById('opponent-sprite')
-  const isCorrect = value === currentCorrectAnswer
+  const isCorrect = isPlayerAnswerCorrect(value)
 
   if (catchAttemptPhase) {
     document.querySelectorAll('.answer-btn').forEach(b => {
       b.disabled = true
-      if (Number(b.textContent) === currentCorrectAnswer) b.classList.add('correct')
+      if (isButtonTheCorrectAnswer(b)) b.classList.add('correct')
       if (b === btn && !isCorrect) b.classList.add('wrong')
     })
     const caught = isCorrect
@@ -415,7 +559,7 @@ function submitAnswer(value, btn) {
 
   document.querySelectorAll('.answer-btn').forEach(b => {
     b.disabled = true
-    if (Number(b.textContent) === currentCorrectAnswer) b.classList.add('correct')
+    if (isButtonTheCorrectAnswer(b)) b.classList.add('correct')
     if (b === btn && !isCorrect) b.classList.add('wrong')
   })
 
@@ -694,8 +838,8 @@ function saveCaughtToFile(id) {
   }).catch(() => {})
 }
 
-// Init: load caught, fainted, and evolution then render
-Promise.all([loadCaughtFile(), loadFaintedFile(), loadEvolutionFile()]).then(() => {
+// Init: load caught, fainted, evolution, sheet MCQs then render
+Promise.all([loadCaughtFile(), loadFaintedFile(), loadEvolutionFile(), loadSheetQuestions()]).then(() => {
   renderPokemonSelection()
   startBtn.addEventListener('click', startBattle)
   nextBattleBtn.addEventListener('click', nextBattle)

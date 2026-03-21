@@ -727,6 +727,17 @@ h1 {
   color: #1a1a1a;
   margin: 0;
   line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+#math-question .question-emoji {
+  font-size: 2em;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0.06em;
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
 }
 
 #math-question .math-operator {
