@@ -250,23 +250,31 @@ h1 {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  max-width: 100vw;
+  right: 0;
+  width: 100%;
+  max-width: 100%;
   height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
   border: none;
   border-radius: 0;
   overflow: hidden;
   box-shadow: none;
   display: flex;
   flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
 }
 
 /* Main battle view: fills remaining space above dialogue bar */
 .battle-scene {
   position: relative;
-  flex: 1;
+  flex: 1 1 0;
   min-height: 0;
   overflow: hidden;
+  container-type: size;
+  container-name: battle;
   background: var(--bg-dark);
   background-image: radial-gradient(ellipse at top, #2d2d44 0%, #1a1a2e 60%);
 }
@@ -348,7 +356,7 @@ h1 {
   justify-content: center;
 }
 
-/* Scale player sprite container to fit viewport (no scroll) */
+/* Scale player sprite (cqh caps relative to .battle-scene when supported) */
 .player-sprite-corner .grass-patch {
   width: min(420px, 45vw, 38vh);
   height: min(420px, 45vw, 38vh);
@@ -357,6 +365,18 @@ h1 {
 .player-sprite-corner .pokemon-sprite {
   width: min(400px, 42vw, 36vh);
   height: min(400px, 42vw, 36vh);
+}
+
+@supports (height: 1cqh) {
+  .player-sprite-corner .grass-patch {
+    width: min(420px, 45vw, 38vh, 44cqh);
+    height: min(420px, 45vw, 38vh, 44cqh);
+  }
+
+  .player-sprite-corner .pokemon-sprite {
+    width: min(400px, 42vw, 36vh, 42cqh);
+    height: min(400px, 42vw, 36vh, 42cqh);
+  }
 }
 
 .player-info-corner {
@@ -1021,6 +1041,121 @@ h1 {
   background: #2a2a4e;
   border-color: var(--accent-blue);
   transform: scale(1.02);
+}
+
+/* ========== Tablet / iPad: battle fits one screen ========== */
+@media (max-width: 1024px), ((max-width: 1400px) and (max-height: 1050px)) {
+  #battle-screen {
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+
+  .opponent-row {
+    height: 42%;
+  }
+
+  @supports (height: 1cqh) {
+    .opponent-row {
+      max-height: min(50%, 48cqh);
+    }
+
+    .opponent-sprite-corner .grass-patch {
+      max-width: min(100%, 46cqh);
+      max-height: min(100%, 46cqh);
+    }
+  }
+
+  .player-sprite-corner .grass-patch {
+    width: min(220px, 40vw, 32vh);
+    height: min(220px, 40vw, 32vh);
+  }
+
+  .player-sprite-corner .pokemon-sprite {
+    width: min(200px, 38vw, 30vh);
+    height: min(200px, 38vw, 30vh);
+  }
+
+  @supports (height: 1cqh) {
+    .player-sprite-corner .grass-patch {
+      width: min(220px, 40vw, 32vh, 40cqh);
+      height: min(220px, 40vw, 32vh, 40cqh);
+    }
+
+    .player-sprite-corner .pokemon-sprite {
+      width: min(200px, 38vw, 30vh, 38cqh);
+      height: min(200px, 38vw, 30vh, 38cqh);
+    }
+  }
+
+  .player-sprite-corner,
+  .player-info-corner {
+    bottom: 8px;
+  }
+
+  .player-sprite-corner {
+    left: 8px;
+  }
+
+  .player-info-corner {
+    right: 8px;
+    width: 34%;
+    padding: 8px;
+  }
+
+  .opponent-info-corner {
+    padding: 8px 8px 10px 8px;
+  }
+
+  .opponent-sprite-corner {
+    padding: 10px;
+  }
+
+  .pokemon-info-bar {
+    padding: 6px 8px;
+  }
+
+  .battle-dialogue {
+    flex-direction: column;
+    flex-shrink: 1;
+    min-height: 0;
+    max-height: min(42dvh, 320px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dialogue-message {
+    border-left: 4px solid #5d6d73;
+    flex-shrink: 0;
+  }
+
+  .dialogue-choices {
+    width: 100%;
+    flex-shrink: 0;
+    border-left: none;
+    border-top: 4px solid #5d6d73;
+    padding: 8px 10px 10px;
+  }
+
+  .choices-grid {
+    min-height: 88px;
+    gap: 6px;
+  }
+
+  #math-question {
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  #feedback {
+    font-size: 0.68rem;
+  }
+
+  .answer-btn {
+    padding: 10px 6px;
+    font-size: 0.72rem;
+    min-height: 40px;
+  }
 }
 
 /* ========== Mobile-friendly styles ========== */
