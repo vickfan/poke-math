@@ -58,6 +58,15 @@ h1 {
   font-size: 1.1rem;
 }
 
+.collection-stats {
+  text-align: center;
+  margin: -20px 0 20px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.65rem;
+  line-height: 1.7;
+  color: #b8c5d0;
+}
+
 /* Start screen */
 #pokemon-grid {
   display: grid;
@@ -947,6 +956,11 @@ h1 {
   .subtitle {
     font-size: 0.95rem;
     margin-bottom: 20px;
+  }
+
+  .collection-stats {
+    font-size: 0.55rem;
+    margin: -12px 0 14px;
   }
 
   #pokemon-grid {

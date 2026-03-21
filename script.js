@@ -71,6 +71,20 @@ function getRandomPokemon(excludeId) {
   return pool[Math.floor(Math.random() * pool.length)]
 }
 
+function getCollectionCounts() {
+  const total = POKEMON_LIST.length
+  const caught = POKEMON_LIST.filter(p => CAUGHT_IDS.includes(p.id)).length
+  const uncaught = total - caught
+  return { caught, uncaught, total }
+}
+
+function updateCollectionStats() {
+  const el = document.getElementById('collection-stats')
+  if (!el) return
+  const { caught, uncaught, total } = getCollectionCounts()
+  el.textContent = `Caught ${caught} · Uncaught ${uncaught} (${total} Pokémon)`
+}
+
 function getSelectablePokemon() {
   const slots = CAUGHT_IDS.map(slotId => ({
     slotId,
@@ -114,6 +128,7 @@ function renderPokemonSelection() {
     card.addEventListener('click', () => selectPokemon(slotId))
     pokemonGrid.appendChild(card)
   })
+  updateCollectionStats()
 }
 
 function selectPokemon(slotId) {
