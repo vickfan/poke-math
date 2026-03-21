@@ -227,7 +227,7 @@ function getWrongAnswers(correct, count = 3) {
 }
 
 function loadSheetQuestions() {
-  return fetch('/api/sheet-questions')
+  return fetch('/api/sheet-questions?refresh=1')
     .then(r => r.json().catch(() => ({})))
     .then(data => {
       SHEET_QUESTIONS = Array.isArray(data.questions) ? data.questions : []

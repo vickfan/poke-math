@@ -305,7 +305,12 @@ const server = http.createServer((req, res) => {
           )
           return
         }
-        const stale = !sheetCache.fetchedAt || Date.now() - sheetCache.fetchedAt > SHEET_CACHE_MS
+        const forceRefresh =
+          url.searchParams.get('refresh') === '1' || url.searchParams.get('refresh') === 'true'
+        const stale =
+          forceRefresh ||
+          !sheetCache.fetchedAt ||
+          Date.now() - sheetCache.fetchedAt > SHEET_CACHE_MS
         if (stale) {
           try {
             await refreshSheetQuestions()
