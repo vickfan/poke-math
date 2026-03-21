@@ -14,6 +14,23 @@
       <h1>Pokémon Math Battle</h1>
       <p class="subtitle">Choose your Pokémon and win with math!</p>
       <p id="collection-stats" class="collection-stats" aria-live="polite"></p>
+      <div class="gen-filter" role="group" aria-label="Filter by generation">
+        <button type="button" class="gen-filter-btn active" data-gen="all">All</button>
+        <button type="button" class="gen-filter-btn" data-gen="gen1">Gen 1</button>
+        <button type="button" class="gen-filter-btn" data-gen="gen2">Gen 2</button>
+      </div>
+      <div class="pokemon-search-wrap">
+        <label class="visually-hidden" for="pokemon-search-input">Search Pokémon</label>
+        <input
+          type="search"
+          id="pokemon-search-input"
+          class="pokemon-search-input"
+          placeholder="Search by name or #..."
+          autocomplete="off"
+          spellcheck="false"
+          enterkeyhint="search"
+        />
+      </div>
       <div id="pokemon-grid"></div>
       <button id="start-btn" disabled>Start Battle</button>
     </section>

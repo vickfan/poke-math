@@ -25,6 +25,11 @@ let LEVEL_STATE = {}
 // Slot (base form id) of the Pokémon currently in use, for evolution updates
 let selectedSlotId = null
 
+/** Start screen: 'all' | 'gen1' | 'gen2' (spriteId 1–151 vs 152–251) */
+let selectionGenFilter = 'all'
+/** Start screen search (name, id slug, or dex # substring) */
+let selectionSearchQuery = ''
+
 let selectedPokemon = null
 let opponentPokemon = null
 let playerHp = 3
@@ -85,6 +90,72 @@ function updateCollectionStats() {
   el.textContent = `Caught ${caught} · Uncaught ${uncaught} (${total} Pokémon)`
 }
 
+function matchesSelectionGenFilter(pokemon) {
+  if (!pokemon || selectionGenFilter === 'all') return true
+  const n = pokemon.spriteId
+  if (selectionGenFilter === 'gen1') return n >= 1 && n <= 151
+  if (selectionGenFilter === 'gen2') return n >= 152 && n <= 251
+  return true
+}
+
+function matchesSelectionSearch(slotId, pokemon) {
+  const raw = selectionSearchQuery.trim().toLowerCase()
+  if (!raw || !pokemon) return true
+  const name = pokemon.name.toLowerCase()
+  const idSlug = String(pokemon.id).toLowerCase()
+  const slot = String(slotId).toLowerCase()
+  if (name.includes(raw)) return true
+  if (idSlug.includes(raw)) return true
+  if (slot.includes(raw)) return true
+  if (String(pokemon.spriteId).includes(raw)) return true
+  return false
+}
+
+function getAfterGenFilterPokemon() {
+  return getSelectablePokemon().filter(({ pokemon }) => matchesSelectionGenFilter(pokemon))
+}
+
+function getFilteredSelectablePokemon() {
+  return getAfterGenFilterPokemon().filter(({ slotId, pokemon }) =>
+    matchesSelectionSearch(slotId, pokemon)
+  )
+}
+
+function initGenFilterButtons() {
+  const group = document.querySelector('.gen-filter')
+  if (!group) return
+  group.querySelectorAll('.gen-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const gen = btn.getAttribute('data-gen')
+      if (!gen) return
+      selectionGenFilter = gen
+      group.querySelectorAll('.gen-filter-btn').forEach(b => b.classList.toggle('active', b === btn))
+      const filtered = getFilteredSelectablePokemon()
+      if (selectedSlotId != null && !filtered.some(x => x.slotId === selectedSlotId)) {
+        selectedSlotId = null
+        selectedPokemon = null
+        startBtn.disabled = true
+      }
+      renderPokemonSelection()
+    })
+  })
+}
+
+function initPokemonSearchInput() {
+  const input = document.getElementById('pokemon-search-input')
+  if (!input) return
+  input.addEventListener('input', () => {
+    selectionSearchQuery = input.value
+    const filtered = getFilteredSelectablePokemon()
+    if (selectedSlotId != null && !filtered.some(x => x.slotId === selectedSlotId)) {
+      selectedSlotId = null
+      selectedPokemon = null
+      startBtn.disabled = true
+    }
+    renderPokemonSelection()
+  })
+}
+
 function getSelectablePokemon() {
   const slots = CAUGHT_IDS.map(slotId => ({
     slotId,
@@ -98,7 +169,26 @@ function getSelectablePokemon() {
 
 function renderPokemonSelection() {
   pokemonGrid.innerHTML = ''
-  getSelectablePokemon().forEach(({ slotId, pokemon }) => {
+  const afterGen = getAfterGenFilterPokemon()
+  const rows = getFilteredSelectablePokemon()
+  if (rows.length === 0) {
+    const empty = document.createElement('p')
+    empty.className = 'gen-filter-empty'
+    const hasSearch = selectionSearchQuery.trim().length > 0
+    let msg = 'No Pokémon to show.'
+    if (hasSearch && afterGen.length > 0) {
+      msg = 'No Pokémon match your search. Try another name or clear the search.'
+    } else if (selectionGenFilter === 'gen1') {
+      msg = 'No Gen 1 Pokémon in your party. Try All or Gen 2.'
+    } else if (selectionGenFilter === 'gen2') {
+      msg = 'No Gen 2 Pokémon in your party. Try All or Gen 1.'
+    }
+    empty.textContent = msg
+    pokemonGrid.appendChild(empty)
+    updateCollectionStats()
+    return
+  }
+  rows.forEach(({ slotId, pokemon }) => {
     const card = document.createElement('div')
     card.className = 'pokemon-card'
     card.dataset.id = slotId
@@ -128,6 +218,14 @@ function renderPokemonSelection() {
     card.addEventListener('click', () => selectPokemon(slotId))
     pokemonGrid.appendChild(card)
   })
+  if (selectedSlotId != null) {
+    pokemonGrid.querySelectorAll('.pokemon-card').forEach(card => {
+      card.classList.toggle('selected', card.dataset.id === selectedSlotId)
+    })
+    const formId = EVOLUTION_STATE[selectedSlotId] || selectedSlotId
+    selectedPokemon = POKEMON_LIST.find(p => p.id === formId)
+    if (selectedPokemon) startBtn.disabled = false
+  }
   updateCollectionStats()
 }
 
@@ -855,6 +953,8 @@ function saveCaughtToFile(id) {
 
 // Init: load caught, fainted, evolution, sheet MCQs then render
 Promise.all([loadCaughtFile(), loadFaintedFile(), loadEvolutionFile(), loadSheetQuestions()]).then(() => {
+  initGenFilterButtons()
+  initPokemonSearchInput()
   renderPokemonSelection()
   startBtn.addEventListener('click', startBattle)
   nextBattleBtn.addEventListener('click', nextBattle)
