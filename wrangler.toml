@@ -1,0 +1,13 @@
+name = "pokemon-game"
+pages_build_output_dir = "."
+compatibility_date = "2024-11-01"
+
+[[kv_namespaces]]
+binding = "GAME_STATE"
+# Replace with your KV namespace id (bindings > KV > create namespace)
+id = "REPLACE_WITH_NAMESPACE_ID"
+
+[vars]
+QUESTIONS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-a7YhVd3iyf9ULzUBrUdmWb8RE5TraIkE9FKYiI3N5oDdfKE4uWpAX4UFNvEJIqMbt4hP-bRPpQCz/pub?gid=0&single=true&output=csv"
+# Vars can be overridden in the Pages dashboard (Settings > Environment variables)
+ALLOWED_QUESTION_TYPE = "MATH,EN,ZH"

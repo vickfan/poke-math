@@ -5,11 +5,12 @@
   "main": "pokemon.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "wrangler pages dev"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "pm2": "^6.0.14"
+  "dependencies": {},
+  "devDependencies": {
+    "wrangler": "^4"
   }
 }
