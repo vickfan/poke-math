@@ -1,14 +1,14 @@
 [
   {
     "key": "caught",
-    "value": "[\"wartortle\",\"tentacruel\",\"victreebel\",\"exeggutor\",\"kabutops\",\"nidorina\",\"slowbro\",\"onix\",\"shellder\",\"drowzee\",\"vileplume\",\"jolteon\",\"charmeleon\",\"butterfree\",\"clefable\",\"charizard\",\"horsea\"]"
+    "value": "[\"wartortle\",\"tentacruel\",\"victreebel\",\"exeggutor\",\"kabutops\",\"nidorina\",\"slowbro\",\"onix\",\"shellder\",\"drowzee\",\"vileplume\",\"jolteon\",\"charmeleon\",\"butterfree\",\"clefable\",\"charizard\",\"rattata\",\"cloyster\",\"zapdos\",\"golduck\",\"starmie\",\"magmar\",\"zubat\",\"nidoran-m\",\"parasect\",\"sandslash\",\"hitmonlee\",\"seaking\",\"weepinbell\",\"ekans\",\"jigglypuff\",\"magnemite\",\"electrode\",\"omanyte\",\"nidorino\",\"aerodactyl\",\"meowth\",\"omastar\",\"grimer\",\"marowak\",\"primeape\",\"jynx\",\"mew\",\"tentacool\",\"kakuna\",\"alakazam\",\"haunter\",\"pidgey\",\"nidoran-f\",\"ditto\",\"voltorb\",\"moltres\",\"mr-mime\",\"articuno\",\"pidgeot\",\"vulpix\",\"porygon\",\"beedrill\",\"hitmonchan\",\"dragonair\",\"gloom\",\"cubone\",\"fearow\",\"gengar\",\"electabuzz\",\"furret\"]"
   },
   {
     "key": "fainted",
-    "value": "[\"bulbasaur\"]"
+    "value": "[]"
   },
   {
     "key": "evolution",
-    "value": "{\"state\":{\"eevee\":\"jolteon\"},\"levels\":{\"bulbasaur\":1}}"
+    "value": "{\"state\":{\"haunter\":\"gengar\"},\"levels\":{\"charmeleon\":2,\"bulbasaur\":2,\"eevee\":1,\"zapdos\":24,\"wartortle\":2,\"haunter\":4,\"aerodactyl\":8}}"
   }
 ]
